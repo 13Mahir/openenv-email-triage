@@ -4,28 +4,43 @@ from models import Observation, Action, Email
 
 class OpenEnv:
     def __init__(self, seed: int = 42):
+        import time
         self.max_steps = 20
         self.current_step = 0
-        self.seed = seed
+        self.seed = int(time.time() * 1000) % 100000
         self.rng = random.Random(self.seed)
         
         base_emails = [
-            ("boss@corp.com", ["Urgent: Server Down", "Emergency: PROD Down"], ["Fix it now!", "Server is unresponsive, look into it immediately!"]),
-            ("spam@offer.com", ["Win $1000", "Claim your prize"], ["Click here to win!", "You are selected for a $1000 gift card."]),
-            ("customer@client.com", ["Help with login", "Login issue"], ["I can't login.", "Reset my password please, I am locked out."]),
-            ("hr@corp.com", ["Policy Update", "New HR Policy"], ["Please read attached.", "Check the updated employee handbook."]),
-            ("dev@corp.com", ["PR Review", "Code Review Request"], ["Review my PR.", "Can you approve my merge request?"]),
-            ("newsletter@corp.com", ["Weekly Digest", "Tech News"], ["Here is what happened this week.", "Top articles for you."]),
-            ("noreply@system.com", ["Notice of maintenance", "System update"], ["Expect downtime this weekend.", "We are updating features."])
+            ("boss@corp.com", ["Urgent: Server Down", "Emergency: PROD Down", "Critical Outage"], ["Fix it now!", "Server is unresponsive, look into it immediately!", "Immediate action needed."]),
+            ("spam@offer.com", ["Win $1000", "Claim your prize", "You won a car"], ["Click here to win!", "You are selected for a $1000 gift card.", "Act now and claim."]),
+            ("customer@client.com", ["Help with login", "Login issue", "Cannot access account"], ["I can't login.", "Reset my password please, I am locked out.", "App keeps crashing during login."]),
+            ("hr@corp.com", ["Policy Update", "New HR Policy", "Important Benefits Update"], ["Please read attached.", "Check the updated employee handbook.", "Read the annual compliance policy."]),
+            ("dev@corp.com", ["PR Review", "Code Review Request", "Please review code"], ["Review my PR.", "Can you approve my merge request?", "I fixed the bugs, please review."]),
+            ("newsletter@corp.com", ["Weekly Digest", "Tech News", "Company Newsletter"], ["Here is what happened this week.", "Top articles for you.", "Read our monthly recap."]),
+            ("noreply@system.com", ["Notice of maintenance", "System update", "Build Failed"], ["Expect downtime this weekend.", "We are updating features.", "Your pipeline failed."])
         ]
         
         self.emails = []
         for i, (sender, subjs, bodies) in enumerate(base_emails):
+            if "boss" not in sender and "customer" not in sender:
+                if self.rng.random() < 0.2:
+                    continue 
+
             subj = self.rng.choice(subjs)
             body = self.rng.choice(bodies)
             eid = f"msg_{self.rng.randint(1000, 9999)}_{i}"
             self.emails.append(Email(id=eid, sender=sender, subject=subj, body=body))
-        
+            
+        for i in range(self.rng.randint(0, 2)):
+            eid = f"msg_{self.rng.randint(1000, 9999)}_ext_{i}"
+            n_type = self.rng.choice(["newsletter", "spam", "noreply"])
+            if n_type == "newsletter":
+                self.emails.append(Email(id=eid, sender="newsletter@corp.com", subject="Extra updates", body="Daily digest."))
+            elif n_type == "spam":
+                self.emails.append(Email(id=eid, sender="spam@offer.com", subject="You are the 100th visitor!", body="Claim prize."))
+            else:
+                self.emails.append(Email(id=eid, sender="noreply@system.com", subject="Alert", body="Storage full."))
+
         self.rng.shuffle(self.emails)
         
         self.assigned_labels: Dict[str, str] = {}
