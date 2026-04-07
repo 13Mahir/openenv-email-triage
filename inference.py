@@ -5,12 +5,12 @@ from typing import List, Optional
 from openai import OpenAI
 from environment import OpenEnv
 from models import Action
-from tasks.hard import get_grader
 
 API_KEY = os.getenv("HF_TOKEN") or os.getenv("API_KEY")
 API_BASE_URL = os.getenv("API_BASE_URL") or "https://router.huggingface.co/v1"
 MODEL_NAME = os.getenv("MODEL_NAME") or "Qwen/Qwen2.5-72B-Instruct"
 
+TASK_LIST = ["easy", "medium", "hard"]
 
 def log_start(task: str, env: str, model: str):
     print(f"[START] task={task} env={env} model={model}", flush=True)
@@ -23,7 +23,7 @@ def log_step(step: int, action: str, reward: float, done: bool, error: Optional[
 
 def log_end(success: bool, steps: int, score: float, rewards: List[float]):
     rewards_str = ",".join(f"{r:.2f}" for r in rewards)
-    print(f"[END] success={str(success).lower()} steps={steps} score={score:.2f} rewards={rewards_str}", flush=True)
+    print(f"[END] success={str(success).lower()} steps={steps} score={score:.2f} rewards={rewards_str}\n", flush=True)
 
 
 def generate_reply(client, email):
@@ -58,17 +58,25 @@ def classify_email(client, email):
         return "other"
 
 
-async def main():
+async def run_single_task(task_name):
     client = OpenAI(base_url=API_BASE_URL, api_key=API_KEY)
 
     env = OpenEnv()
     obs = env.reset()
+    
+    if task_name == "easy":
+        from tasks.easy import get_grader
+    elif task_name == "medium":
+        from tasks.medium import get_grader
+    else:
+        from tasks.hard import get_grader
+        
     grader = get_grader()
 
     rewards = []
     steps_taken = 0
 
-    log_start(task="email_triage_hard", env="email_env", model=MODEL_NAME)
+    log_start(task=task_name, env="email_env", model=MODEL_NAME)
 
     boss_action = None
     customer_action = None
@@ -146,6 +154,10 @@ async def main():
 
     log_end(success, steps_taken, score, rewards)
 
+
+async def main():
+    for TASK_NAME in TASK_LIST:
+        await run_single_task(TASK_NAME)
 
 if __name__ == "__main__":
     asyncio.run(main())
