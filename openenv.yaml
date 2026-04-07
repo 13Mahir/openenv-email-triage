@@ -4,11 +4,9 @@ environment:
   entry_point: "environment:OpenEnv"
 
 tasks:
-  - id: "email_triage_easy"
-    grader: "tasks.easy:get_grader"
-
-  - id: "email_triage_medium"
-    grader: "tasks.medium:get_grader"
-
-  - id: "email_triage_hard"
-    grader: "tasks.hard:get_grader"
+  - name: easy
+    path: tasks.easy:get_grader
+  - name: medium
+    path: tasks.medium:get_grader
+  - name: hard
+    path: tasks.hard:get_grader
