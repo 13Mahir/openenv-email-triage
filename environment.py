@@ -41,6 +41,20 @@ class OpenEnv:
             else:
                 self.emails.append(Email(id=eid, sender="noreply@system.com", subject="Alert", body="Storage full."))
 
+        self.emails.append(Email(
+            id=f"msg_special_{self.rng.randint(1000, 9999)}_1",
+            sender="boss@corp.com",
+            subject="FYI: weekly summary",
+            body="Just for your information."
+        ))
+
+        self.emails.append(Email(
+            id=f"msg_special_{self.rng.randint(1000, 9999)}_2",
+            sender="newsletter@corp.com",
+            subject="Important policy update",
+            body="This is a mandatory update."
+        ))
+
         self.rng.shuffle(self.emails)
         
         self.assigned_labels: Dict[str, str] = {}
@@ -104,13 +118,24 @@ class OpenEnv:
         if target_email and target_email.id not in self.resolved_emails:
             self.resolved_emails.append(target_email.id)
             
-            if len(self.resolved_emails) == 1 and ("boss" in target_email.sender.lower() or "urgent" in target_email.subject.lower()):
+            sender = target_email.sender.lower()
+            
+            if len(self.resolved_emails) == 1 and ("boss" in sender or "urgent" in target_email.subject.lower()):
                 reward += 0.1
             
-            if "customer" in target_email.sender.lower():
+            if "customer" in sender:
                 dev_processed = any("dev" in self._get_email_by_id(i).sender.lower() for i in self.resolved_emails if self._get_email_by_id(i))
                 if not dev_processed:
                     reward += 0.1
+
+            if "dev" in sender:
+                customer_pending = any(
+                    "customer" in e.sender.lower()
+                    for e in self.emails
+                    if e.id not in self.resolved_emails
+                )
+                if customer_pending:
+                    reward -= 0.1
 
         if action.action_type == "assign_label" and target_email and action.label:
             lbl = action.label.lower()
