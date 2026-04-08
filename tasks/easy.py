@@ -14,11 +14,11 @@ class EmailEasyGrader:
 
             score = min(0.95, correct)
             
-            score = score * 2.5
-            score = score * 0.8 + 0.2
             score = float(score)
             if score is None:
                 score = 0.5
+                
+            score = score ** 0.7
 
             if score <= 0.0:
                 score = 0.05
@@ -26,7 +26,7 @@ class EmailEasyGrader:
                 score = 0.95
 
             score = max(MIN_VALID_SCORE, min(MAX_VALID_SCORE, score))
-            return score
+            return float(score)
         except Exception:
             return MIN_VALID_SCORE
 
