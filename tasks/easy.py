@@ -1,3 +1,5 @@
+import random
+
 MIN_VALID_SCORE = 0.002
 MAX_VALID_SCORE = 0.998
 
@@ -25,6 +27,8 @@ class EmailEasyGrader:
             elif score >= 1.0:
                 score = 0.95
 
+            noise = random.uniform(-0.02, 0.02)
+            score = score + noise
             score = max(MIN_VALID_SCORE, min(MAX_VALID_SCORE, score))
             return float(score)
         except Exception:
