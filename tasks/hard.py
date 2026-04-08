@@ -1,3 +1,6 @@
+MIN_VALID_SCORE = 0.002
+MAX_VALID_SCORE = 0.998
+
 class EmailHardGrader:
     def grade(self, env) -> float:
         try:
@@ -65,9 +68,14 @@ class EmailHardGrader:
             
             total_score = correctness_score + quality_score + efficiency_score + priority_score
             score = min(0.96, total_score)
-            return float(max(0.0, min(1.0, score)))
+            
+            score = float(score)
+            if score is None:
+                score = 0.5
+            score = max(MIN_VALID_SCORE, min(MAX_VALID_SCORE, score))
+            return score
         except Exception:
-            return 0.0
+            return MIN_VALID_SCORE
 
 def get_grader():
     return EmailHardGrader()
