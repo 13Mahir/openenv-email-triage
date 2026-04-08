@@ -25,6 +25,12 @@ class EmailMediumGrader:
             score = float(score)
             if score is None:
                 score = 0.5
+
+            if score <= 0.0:
+                score = 0.05
+            elif score >= 1.0:
+                score = 0.95
+
             score = max(MIN_VALID_SCORE, min(MAX_VALID_SCORE, score))
             return score
         except Exception:
