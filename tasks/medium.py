@@ -22,6 +22,7 @@ class EmailMediumGrader:
 
             score = min(0.95, correct / 3.0)
             
+            score = score * 0.8 + 0.05
             score = float(score)
             if score is None:
                 score = 0.5

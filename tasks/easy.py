@@ -14,6 +14,7 @@ class EmailEasyGrader:
 
             score = min(0.95, correct)
             
+            score = score * 0.9 + 0.1
             score = float(score)
             if score is None:
                 score = 0.5
