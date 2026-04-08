@@ -69,7 +69,8 @@ class EmailHardGrader:
             total_score = correctness_score + quality_score + efficiency_score + priority_score
             score = min(0.96, total_score)
             
-            score = score * 0.7 + 0.02
+            score = score * 2.5
+            score = score * 0.6 + 0.05
             score = float(score)
             if score is None:
                 score = 0.5
