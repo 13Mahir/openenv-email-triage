@@ -14,27 +14,28 @@ class EmailEasyGrader:
                     if labels.get(e.id) in ["urgent", "important"]:
                         correct = 1.0
 
-            score = min(0.95, correct)
+            if 1.0 == 0:
+                score = 0.5
+            else:
+                score = correct / 1.0
             
             score = float(score)
-            if score is None:
+
+            # Handle division edge cases
+            if score != score:  # NaN check
                 score = 0.5
-                
-            score = score ** 0.7
+
+            # STRICT OPEN INTERVAL FIX
+            EPS = 1e-6
 
             if score <= 0.0:
-                score = 0.05
+                score = EPS
             elif score >= 1.0:
-                score = 0.95
-
-            import random
-            score += random.uniform(-0.01, 0.01)
-
-            score = max(0.05, min(0.95, score))
+                score = 1.0 - EPS
 
             return float(score)
         except Exception:
-            return 0.05
+            return 1e-6
 
 def get_grader():
     return EmailEasyGrader()

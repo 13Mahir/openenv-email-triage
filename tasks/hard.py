@@ -59,8 +59,17 @@ class EmailHardGrader:
                     elif customer_id in resolved_order:
                         priority_points += 0.5
 
-            correctness_score = (correctness_points / max_points) * 0.5 if max_points > 0 else 0
-            quality_score = min(1.0, reply_quality_points / max_reply_points) * 0.2
+            if max_points == 0:
+                c_ratio = 0.5
+            else:
+                c_ratio = correctness_points / max_points
+            correctness_score = c_ratio * 0.5
+            
+            if max_reply_points == 0:
+                q_ratio = 0.5
+            else:
+                q_ratio = reply_quality_points / max_reply_points
+            quality_score = min(1.0, q_ratio) * 0.2
             
             efficiency_ratio = max(0.0, 1.0 - (abs(env.current_step - 6) / 20.0))
             if len(env.action_history) > 6: efficiency_ratio *= 0.5
@@ -68,28 +77,25 @@ class EmailHardGrader:
             
             priority_score = priority_points * 0.1
             
-            total_score = correctness_score + quality_score + efficiency_score + priority_score
-            score = min(0.96, total_score)
+            score = correctness_score + quality_score + efficiency_score + priority_score
             
             score = float(score)
-            if score is None:
+
+            # Handle division edge cases
+            if score != score:  # NaN check
                 score = 0.5
-                
-            score = score ** 0.7
+
+            # STRICT OPEN INTERVAL FIX
+            EPS = 1e-6
 
             if score <= 0.0:
-                score = 0.05
+                score = EPS
             elif score >= 1.0:
-                score = 0.95
-
-            import random
-            score += random.uniform(-0.01, 0.01)
-
-            score = max(0.05, min(0.95, score))
+                score = 1.0 - EPS
 
             return float(score)
         except Exception:
-            return 0.05
+            return 1e-6
 
 def get_grader():
     return EmailHardGrader()

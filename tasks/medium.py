@@ -22,27 +22,29 @@ class EmailMediumGrader:
                 if "customer" in s and e.id in replied:
                     correct += 1.0
 
-            score = min(0.95, correct / 3.0)
+            total = 3.0
+            if total == 0:
+                score = 0.5
+            else:
+                score = correct / total
             
             score = float(score)
-            if score is None:
+
+            # Handle division edge cases
+            if score != score:  # NaN check
                 score = 0.5
-                
-            score = score ** 0.7
+
+            # STRICT OPEN INTERVAL FIX
+            EPS = 1e-6
 
             if score <= 0.0:
-                score = 0.05
+                score = EPS
             elif score >= 1.0:
-                score = 0.95
-
-            import random
-            score += random.uniform(-0.01, 0.01)
-
-            score = max(0.05, min(0.95, score))
+                score = 1.0 - EPS
 
             return float(score)
         except Exception:
-            return 0.05
+            return 1e-6
 
 def get_grader():
     return EmailMediumGrader()

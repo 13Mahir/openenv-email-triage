@@ -224,10 +224,4 @@ class OpenEnv:
 
         reward += 0.01 * (self.max_steps - self.current_step)
 
-        reward = float(reward)
-        if reward <= 0.0:
-            reward = 0.05
-        elif reward >= 1.0:
-            reward = 0.95
-
-        return self._get_observation(), round(reward, 2), done, info
+        return self._get_observation(), float(reward), done, info
