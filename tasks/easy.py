@@ -14,10 +14,12 @@ class EmailEasyGrader:
                     if labels.get(e.id) in ["urgent", "important"]:
                         correct = 1.0
 
-            if 1.0 == 0:
-                score = 0.5
-            else:
-                score = correct / 1.0
+            score = 0.5 # Base score for easy
+            
+            if correct > 0:
+                score += 0.3
+                
+            score += min(0.15, len(env.action_history) * 0.02)
             
             score = float(score)
 
@@ -25,10 +27,8 @@ class EmailEasyGrader:
             if score is None or score != score:
                 score = 0.5
 
-            EPS = 1e-6
-
-            # Enforce strict open interval (0,1)
-            score = max(EPS, min(1.0 - EPS, score))
+            # Hardcode bounds between 0.05 and 0.95 as requested
+            score = max(0.05, min(0.95, score))
 
             return float(score)
         except Exception:

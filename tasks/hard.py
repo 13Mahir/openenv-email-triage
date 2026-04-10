@@ -60,24 +60,23 @@ class EmailHardGrader:
                         priority_points += 0.5
 
             if max_points == 0:
-                c_ratio = 0.5
+                c_ratio = 0.0
             else:
                 c_ratio = correctness_points / max_points
-            correctness_score = c_ratio * 0.5
             
-            if max_reply_points == 0:
-                q_ratio = 0.5
-            else:
-                q_ratio = reply_quality_points / max_reply_points
-            quality_score = min(1.0, q_ratio) * 0.2
+            score = 0.1 # Base score for hard
             
-            efficiency_ratio = max(0.0, 1.0 - (abs(env.current_step - 6) / 20.0))
-            if len(env.action_history) > 6: efficiency_ratio *= 0.5
-            efficiency_score = efficiency_ratio * 0.2
-            
-            priority_score = priority_points * 0.1
-            
-            score = correctness_score + quality_score + efficiency_score + priority_score
+            if correctness_points > 0:
+                score += c_ratio * 0.4
+                
+            if reply_quality_points > 0:
+                q_ratio = min(1.0, reply_quality_points / 1.0)
+                score += q_ratio * 0.2
+                
+            if priority_points > 0:
+                score += priority_points * 0.1
+                
+            score += min(0.19, len(env.action_history) * 0.02)
             
             score = float(score)
 
@@ -85,10 +84,8 @@ class EmailHardGrader:
             if score is None or score != score:
                 score = 0.5
 
-            EPS = 1e-6
-
-            # Enforce strict open interval (0,1)
-            score = max(EPS, min(1.0 - EPS, score))
+            # Hardcode bounds between 0.05 and 0.95 as requested
+            score = max(0.05, min(0.95, score))
 
             return float(score)
         except Exception:
