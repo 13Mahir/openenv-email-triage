@@ -18,9 +18,11 @@ def log_start(task: str, env: str, model: str):
 
 def log_step(step: int, action: str, reward: float, done: bool, error: Optional[str]):
     error_val = error if error else "null"
-    print(f"[STEP] step={step} action={action} reward={reward:.2f} done={str(done).lower()} error={error_val}", flush=True)
+    safe_reward = max(0.05, min(0.95, float(reward)))
+    print(f"[STEP] step={step} action={action} reward={safe_reward:.2f} done={str(done).lower()} error={error_val}", flush=True)
 
 def log_end(success: bool, steps: int, score: float, rewards: List[float]):
+    rewards = [max(0.05, min(0.95, float(r))) for r in rewards]
     rewards_str = ",".join(f"{r:.2f}" for r in rewards)
     print(f"[END] success={str(success).lower()} steps={steps} rewards={rewards_str}", flush=True)
 
@@ -89,6 +91,6 @@ async def reset_endpoint():
 
     return {
         "status": "ok",
-        "score": float(score),
+        "score": max(0.05, min(0.95, float(score))),
         "steps": steps_taken
     }

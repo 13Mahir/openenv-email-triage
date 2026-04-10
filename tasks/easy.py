@@ -27,12 +27,14 @@ class EmailEasyGrader:
             elif score >= 1.0:
                 score = 0.95
 
-            noise = random.uniform(-0.02, 0.02)
-            score = score + noise
-            score = max(MIN_VALID_SCORE, min(MAX_VALID_SCORE, score))
+            import random
+            score += random.uniform(-0.01, 0.01)
+
+            score = max(0.05, min(0.95, score))
+
             return float(score)
         except Exception:
-            return MIN_VALID_SCORE
+            return 0.05
 
 def get_grader():
     return EmailEasyGrader()
