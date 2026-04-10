@@ -81,21 +81,18 @@ class EmailHardGrader:
             
             score = float(score)
 
-            # Handle division edge cases
-            if score != score:  # NaN check
+            # Handle invalid values
+            if score is None or score != score:
                 score = 0.5
 
-            # STRICT OPEN INTERVAL FIX
             EPS = 1e-6
 
-            if score <= 0.0:
-                score = EPS
-            elif score >= 1.0:
-                score = 1.0 - EPS
+            # Enforce strict open interval (0,1)
+            score = max(EPS, min(1.0 - EPS, score))
 
             return float(score)
         except Exception:
-            return 1e-6
+            return 0.5
 
 def get_grader():
     return EmailHardGrader()
